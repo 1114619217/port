@@ -96,6 +96,7 @@ func grabPage(route string) {
 }
 
 func format(name string) (string, string) {
+	name = strings.ToUpper(name)
 	r := strings.Index(name, " ")
 	f := name[:r]
 	l := name[r:]
@@ -120,11 +121,11 @@ func grabPort(portURL string) {
 				} else if i == 1 {
 					//港口代码
 					code := d.Text()
-					port.Code = code
+					port.Code = strings.ToUpper(code)
 				} else if i == 3 {
 					//国家代码
 					countryCode := d.Text()
-					port.CountryCode = countryCode
+					port.CountryCode = strings.ToUpper(countryCode)
 				} else if i == 4 {
 					//国家
 					cnCountry := d.Text()
@@ -132,7 +133,7 @@ func grabPort(portURL string) {
 				} else if i == 5 {
 					//国家
 					enCountry := d.Text()
-					port.EnCountry = enCountry
+					port.EnCountry = strings.ToUpper(enCountry)
 				} else if i == 6 {
 					//国家
 					route := d.Text()
@@ -148,9 +149,9 @@ func grabPort(portURL string) {
 	}
 }
 
-var pageChan = make(chan string, 1)
+var pageChan = make(chan string, 400)
 
-var portChan = make(chan string, 50)
+var portChan = make(chan string, 1000)
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -160,8 +161,8 @@ func main() {
 		case route := <-pageChan:
 			go grabPage(route)
 		case p := <-portChan:
-			go grabPort(p)
-		case <-time.After(time.Second * 120):
+			grabPort(p)
+		case <-time.After(time.Minute * 100):
 			fmt.Println("超时退出...")
 			os.Exit(1)
 		}
